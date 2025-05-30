@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-alpine-multi
+  labels:
+    app: ktl-ai
+spec:
+  volumes:
+    - name: html
+      emptyDir: {}
+  containers:
+    - name: nginx
+      image: nginx:alpine
+      ports:
+        - containerPort: 80
+      volumeMounts:
+        - name: html
+          mountPath: /usr/share/nginx/html
+    - name: content-generator
+      image: alpine
+      volumeMounts:
+        - name: html
+          mountPath: /html
+      command: ["/bin/sh", "-c"]
+      args:
+        - |
+          while true; do
+            echo "<h1>Nginx Alpine Multi-Container</h1>" > /html/index.html
+            echo "<p>Generated at: $(date)</p>" >> /html/index.html
+            echo "<p>Container: nginx:alpine</p>" >> /html/index.html
+            echo "<p>Label: app=ktl-ai</p>" >> /html/index.html
+            sleep 5
+          done
