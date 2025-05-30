@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: nginx-alpine-job
+spec:
+  template:
+    spec:
+      volumes:
+        - name: data-input
+          hostPath:
+            path: /tmp/data-input
+            type: DirectoryOrCreate
+      containers:
+        - name: nginx
+          image: nginx:alpine
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Starting nginx server..."
+              nginx -g 'daemon off;' &
+              sleep 10
+              echo "Testing server availability..."
+              curl -s localhost:80 > /dev/null && echo "Server is running"
+              echo "Checking mounted volume..."
+              ls -la /data/input || echo "Volume not mounted"
+              echo "Nginx job completed successfully"
+          volumeMounts:
+            - name: data-input
+              mountPath: /data/input
+      restartPolicy: Never
+  backoffLimit: 0
